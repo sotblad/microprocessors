@@ -44,8 +44,8 @@ end
 %% input1sp: signal probability of first input signal
 %% input2sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp2AND(input1sp,input2sp)
-  printf("AND Gate for input probabilities (%f %f):\n",input1sp,input2sp)
+function s=sp2AND(input1sp, input2sp)
+  printf("AND Gate for input probabilities (%f %f):\n", input1sp, input2sp)
   s = input1sp*input2sp;
   endfunction
 
@@ -60,7 +60,7 @@ function s=sp2AND(input1sp,input2sp)
 %% input2sp: signal probability of second input signal
 %%        s: output signal probability
 function s=sp2OR(input1sp,input2sp)
-  printf("OR Gate for input probabilities (%f %f):\n",input1sp,input2sp)
+  printf("OR Gate for input probabilities (%f %f):\n", input1sp, input2sp)
   s = 1-(1-input1sp)*(1-input2sp);
 endfunction
 
@@ -74,8 +74,8 @@ endfunction
 %% input1sp: signal probability of first input signal
 %% input2sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp2XOR(input1sp,input2sp)
-  printf("XOR Gate for input probabilities (%f %f):\n",input1sp,input2sp)
+function s=sp2XOR(input1sp, input2sp)
+  printf("XOR Gate for input probabilities (%f %f):\n", input1sp, input2sp)
   s = input1sp*input2sp*((1/input1sp) + (1/input2sp) - 2);
 endfunction
 
@@ -89,8 +89,8 @@ endfunction
 %% input1sp: signal probability of first input signal
 %% input2sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp2NAND(input1sp,input2sp)
-  printf("NAND Gate for input probabilities (%f %f):\n",input1sp,input2sp)
+function s=sp2NAND(input1sp, input2sp)
+  printf("NAND Gate for input probabilities (%f %f):\n", input1sp, input2sp)
   s = 1 - (input1sp*input2sp);
 endfunction
 
@@ -104,8 +104,8 @@ endfunction
 %% input1sp: signal probability of first input signal
 %% input2sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp2NOR(input1sp,input2sp)
-  printf("NOR Gate for input probabilities (%f %f):\n",input1sp,input2sp)
+function s=sp2NOR(input1sp, input2sp)
+  printf("NOR Gate for input probabilities (%f %f):\n", input1sp, input2sp)
   s = (1-input1sp)*(1-input2sp);
 endfunction
 
@@ -124,8 +124,8 @@ endfunction
 %% input2sp: signal probability of second input signal
 %% input3sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp3AND(input1sp,input2sp,input3sp)
-  printf("AND Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
+function s=sp3AND(input1sp, input2sp, input3sp)
+  printf("AND Gate for input probabilities (%f %f %f):\n", input1sp, input2sp, input3sp)
   s = input1sp*input2sp*input3sp;
 endfunction
 
@@ -144,8 +144,8 @@ endfunction
 %% input2sp: signal probability of second input signal
 %% input3sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp3OR(input1sp,input2sp,input3sp)
-  printf("OR Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
+function s=sp3OR(input1sp, input2sp, input3sp)
+  printf("OR Gate for input probabilities (%f %f %f):\n", input1sp, input2sp, input3sp)
   s = 1-(1-input1sp)*(1-input2sp)*(1-input3sp);
 endfunction
 
@@ -164,8 +164,8 @@ endfunction
 %% input2sp: signal probability of second input signal
 %% input3sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp3XOR(input1sp,input2sp,input3sp)
-  printf("XOR Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
+function s=sp3XOR(input1sp, input2sp, input3sp)
+  printf("XOR Gate for input probabilities (%f %f %f):\n", input1sp, input2sp, input3sp)
   s = (1-input1sp)*(1-input2sp)*input3sp + (1-input1sp)*input2sp*(1-input3sp) + input1sp*(1-input2sp)*(1-input3sp) + input1sp*input2sp*input3sp;
 endfunction
 
@@ -184,8 +184,8 @@ endfunction
 %% input2sp: signal probability of second input signal
 %% input3sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp3NAND(input1sp,input2sp,input3sp)
-  printf("NAND Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
+function s=sp3NAND(input1sp, input2sp, input3sp)
+  printf("NAND Gate for input probabilities (%f %f %f):\n", input1sp, input2sp, input3sp)
   s = 1 - (input1sp*input2sp*input3sp);
 endfunction
 
@@ -204,8 +204,8 @@ endfunction
 %% input2sp: signal probability of second input signal
 %% input3sp: signal probability of second input signal
 %%        s: output signal probability
-function s=sp3NOR(input1sp,input2sp,input3sp)
-  printf("NOR Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
+function s=sp3NOR(input1sp, input2sp, input3sp)
+  printf("NOR Gate for input probabilities (%f %f %f):\n", input1sp, input2sp, input3sp)
   s = (1-input1sp)*(1-input2sp)*(1-input3sp);
 endfunction
 
@@ -249,8 +249,10 @@ endfunction
 %%        s: output signal probability
 function s=spXOR(varargin)
   printf("XOR Gate for input probabilities:\n")
- % s = ((2^nargin)-1)/(2^nargin)
-  s = 1;
+  s = sp2XOR(varargin{1,1}, varargin{1,2});
+  for i = 3:nargin
+    s = sp2XOR(s, varargin{1,i});
+  endfor
 endfunction
 
 
