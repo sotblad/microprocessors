@@ -1,52 +1,4 @@
-%%%
-%%%
-%%% τρέχετε το πρόγραμμα ως:
-%%% signalprobs(input1sp,input2sp)
-%%%
-%%% Παραδείγματα:
-%%% >> signalprobs(0.5,0.5)
-%%% AND Gate for input probabilities (0.500000 0.500000):
-%%% ans =  0.25000
-%%% OR Gate for input probabilities (0.500000 0.500000):
-%%% ans =  0.75000
-%%% XOR Gate for input probabilities (0.500000 0.500000):
-%%% NAND Gate for input probabilities (0.500000 0.500000):
-%%% NOR Gate for input probabilities (0.500000 0.500000):
-%%%
-%%%
-%%% >> signalprobs(0,0)
-%%% AND Gate for input probabilities (0.00000 0.00000):
-%%% ans =  0
-%%% OR Gate for input probabilities (0.00000 0.00000):
-%%% ans =  0
-%%% XOR Gate for input probabilities (0.00000 0.00000):
-%%% NAND Gate for input probabilities (0.00000 0.00000):
-%%% NOR Gate for input probabilities (0.00000 0.00000):
-%%%
-%%% >> signalprobs(1,1)
-%%% AND Gate for input probabilities (1.00000 1.00000):
-%%% ans =  1
-%%% OR Gate for input probabilities (1.00000 1.00000):
-%%% ans =  1
-%%% XOR Gate for input probabilities (1.00000 1.00000):
-%%% NAND Gate for input probabilities (1.00000 1.00000):
-%%% NOR Gate for input probabilities (1.00000 1.00000):
-%%%
-%%%
-%%%
-%%% Οι συναρτήσεις που υπολογίζουν τα signal probabilities 
-%%% AND και OR πυλών δύο εισόδων έχουν ήδη υλοποιηθεί παρακάτω.
-%%% Οι συναρτήσεις που υπολογίζουν τα signal probabilities 
-%%% XOR, NAND και NOR πυλών δύο εισόδων είναι ημιτελής.
-%%% (α) Σας ζητείτε να συμπληρώσετε τις υπόλοιπες ημιτελής συναρτήσεις για τον υπολογισμό
-%%% των signal probabilities XOR,NAND και NOR 2 εισόδων πυλών.
-%%% (β) γράψτε συναρτήσεις για τον υπολογισμό των signal probabilities 
-%%% AND, OR, XOR, NAND, NOR πυλών 3 εισόδων
-%%% (γ) γράψτε συναρτήσεις για τον υπολογισμό των signal probabilities 
-%%% AND, OR, XOR, NAND, NOR πυλών Ν εισόδων
-
-
-function s=signalprobs(input1sp, input2sp, input3sp)
+function s=signalprobs(input1sp, input2sp, input3sp, varargin)
   sp2AND(input1sp, input2sp)
   sp2OR(input1sp, input2sp)
   
@@ -64,11 +16,11 @@ function s=signalprobs(input1sp, input2sp, input3sp)
   
   % Οι παρακάτω συναρτήσεις πρέπει να γραφούν εξ'ολοκλήρου για το (γ)
   %% προσοχή: πρέπει να παίζουν ανεξάρτητα του πόσες εισόδους τους δίνετε
-  spAND = spAND(0.5,0.5)
-  spOR = spOR(0.5,0.5)
-  spXOR = spXOR(0.5,0.5)
-  spNAND = spNAND(0.5,0.5)
-  spNOR = spNOR(0.5,0.5)
+  spAND = spAND(0.3,0.2,0.7,0.4,0.25)
+  spOR = spOR(0.3,0.2,0.7,0.4,0.25)
+  spXOR = spXOR(0.3,0.2,0.7,0.4,0.25)
+  spNAND = spNAND(0.3,0.2,0.7,0.4,0.25)
+  spNOR = spNOR(0.3,0.2,0.7,0.4,0.25)
   
   switchingActivity(spAND)
   switchingActivity(spOR)
@@ -202,7 +154,7 @@ endfunction
 % 1 0 0:1
 % 1 0 1:0
 % 1 1 0:0
-% 1 1 1:0
+% 1 1 1:1
 %% signal probability calculator for a 3-input XOR gate
 %% input1sp: signal probability of first input signal
 %% input2sp: signal probability of second input signal
@@ -210,7 +162,7 @@ endfunction
 %%        s: output signal probability
 function s=sp3XOR(input1sp, input2sp, input3sp)
   printf("XOR Gate for input probabilities (%f %f %f):\n",input1sp,input2sp,input3sp)
-  s = (1-input1sp)*(input2sp+input3sp-(2*input2sp*input3sp)) + (input1sp-(input1sp*input2sp))*(1-input3sp);
+  s = (1-input1sp)*(1-input2sp)*input3sp + (1-input1sp)*input2sp*(1-input3sp) + input1sp*(1-input2sp)*(1-input3sp) + input1sp*input2sp*input3sp;
 endfunction
 
 

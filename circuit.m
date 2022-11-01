@@ -1,3 +1,15 @@
+% Truth table:
+% a b c | e | f : d
+% ~~~~~~~~~~~~~~~~~
+% 0 0 0 | 0 | 1 : 0
+% 0 0 1 | 0 | 0 : 0
+% 0 1 0 | 0 | 1 : 0
+% 0 1 1 | 0 | 0 : 0
+% 1 0 0 | 0 | 1 : 0
+% 1 0 1 | 0 | 0 : 0
+% 1 1 0 | 1 | 1 : 1
+% 1 1 1 | 1 | 0 : 0
+
 function s=circuit(a, b, c)
   e = sp2AND(a,b);
   f = spNOT(c);
@@ -5,9 +17,13 @@ function s=circuit(a, b, c)
   printf("Circuit output: %f\n", d);
   # 2.2
   switchingActivity = 2*d*(1-d);
-  printf("Circuit Switching Activity: %f\n", switchingActivity);
+  printf("~~~~~~~~~~~~~~~~~\nCircuit Switching Activity: %f\n", switchingActivity);
   # 2.3
-  MonteCarlo(4456);
+  values = [10, 100, 4456];
+  for i = values
+    printf("~~~~~~~~~~~~~~~~~\nMonte Carlo for N=%d:\n", i);
+    MonteCarlo(i);
+   endfor
 endfunction
 
 function s=sp2AND(input1sp, input2sp)
@@ -17,7 +33,6 @@ endfunction
 function s=spNOT(input1sp)
   s = 1-input1sp;
 endfunction
-
 
 function SwitchingActivity=MonteCarlo(N)
   Workload=[];
