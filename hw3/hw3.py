@@ -2,18 +2,19 @@ import numpy as np
 
 
 def spAND(input1sp, input2sp):
-    #print("AND Gate for input probabilities ({} {})".format(input1sp, input2sp))
+    # print("AND Gate for input probabilities ({} {})".format(input1sp, input2sp))
     return input1sp*input2sp
 
 
 def spNOT(input1sp):
-    #print("NOT Gate for input probability ({})".format(input1sp))
+    # print("NOT Gate for input probability ({})".format(input1sp))
     return 1-input1sp
 
 
 def spXOR(input1sp, input2sp):
-    #print("XOR Gate for input probabilities ({} {})".format(input1sp, input2sp))
+    # print("XOR Gate for input probabilities ({} {})".format(input1sp, input2sp))
     return input1sp*input2sp*((1/input1sp) + (1/input2sp) - 2)
+
 
 def testbench():
     gates = 3
@@ -49,11 +50,11 @@ class Entity:
 
 
 def process(element, SignalsTable):
-    if(element.type == 0):
+    if element.type == 0:
         SignalsTable[element.output] = spAND(SignalsTable[element.inputs[0]], SignalsTable[element.inputs[1]])
-    elif(element.type == 1):
+    elif element.type == 1:
         SignalsTable[element.output] = spNOT(SignalsTable[element.inputs[0]])
-    elif(element.type == 2):
+    elif element.type == 2:
         SignalsTable[element.output] = spXOR(SignalsTable[element.inputs[0]], SignalsTable[element.inputs[1]])
     return SignalsTable
 
@@ -80,11 +81,8 @@ def triadio():
     with open('circuit.txt') as f:
         lines = [line.rstrip('\n') for line in f]
 
-    inputs = []
     firstLine = 0
-    method = 2
-    if(lines[0][0:10] == "top_inputs"):
-        method = 1
+    if lines[0][0:10] == "top_inputs":
         firstLine = 1
         inputs = lines[0].split()[1:]
     else:
@@ -114,6 +112,7 @@ def triadio():
 
     return inputsDict
 
+
 def sort(lines, inputs):
     goodList = []
     badList = []
@@ -140,13 +139,14 @@ def sort(lines, inputs):
 
     return [newLines, sorted(list(dict.fromkeys(nextInps)))]
 
+
 def triatria():
     with open('circuit.txt') as f:
         lines = [line.rstrip('\n') for line in f]
 
     firstLine = 0
     topInputs = ""
-    if (lines[0][0:10] == "top_inputs"):
+    if lines[0][0:10] == "top_inputs":
         firstLine = 1
         topInputs = lines[0]
         inputs = lines[0].split()[1:]
@@ -162,7 +162,7 @@ def triatria():
     flag = [0, 0]
     flag[0] = lines[firstLine:]
     flag[1] = inputs
-    while(len(flag) != 1):
+    while len(flag) != 1:
         flag = sort(flag[0], flag[1])
 
     if firstLine == 1:
