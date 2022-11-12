@@ -114,55 +114,73 @@ def triadio():
 
     return inputsDict
 
+def sort(lines, inputs):
+    goodList = []
+    badList = []
+    inps = []
+    bad = 0
+    for i in range(0, len(lines)):
+        vars = lines[i].split()[1:]
+        gateInputs = vars[1:]
+        inputs1 = list(set(gateInputs) & set(inputs))
+        if len(inputs1) == len(gateInputs):
+            goodList.append(i)
+            inps.append(vars[0])
+        else:
+            bad = 1
+            badList.append(i)
+    if bad == 0:
+        print("\n".join(lines))
+        return [lines]
+    next = goodList + badList
+    nextInps = inputs + inps
+    newLines = []
+    for i in next:
+        newLines.append(lines[i])
+
+    return [newLines, sorted(list(dict.fromkeys(nextInps)))]
+
 def triatria():
-    ElementTypes = ["AND", "NOT", "XOR"]
-    inputsDict = dict()
     with open('circuit.txt') as f:
         lines = [line.rstrip('\n') for line in f]
 
-    inputs = []
     firstLine = 0
-    method = 2
+    topInputs = ""
     if (lines[0][0:10] == "top_inputs"):
-        method = 1
         firstLine = 1
+        topInputs = lines[0]
         inputs = lines[0].split()[1:]
+    else:
+        leftSide = []
+        rightSide = []
+        for i in range(firstLine, len(lines)):
+            vars = lines[i].split()[1:]
+            leftSide.append(vars[0])
+            rightSide = rightSide + vars[1:]
+        inputs = list(set(rightSide) - set(leftSide))
 
-    new = []
-    pendingLines = []
-    inputsDict = dict()
-    leftSide = []
-    rightSide = []
-    for i in range(firstLine, len(lines)):
-        vars = lines[i].split()[1:]
-        gateInputs = vars[1:]
-        valid = 1
-        for j in range(0, len(gateInputs)):
-            print(gateInputs[j])
-            if(gateInputs[j] in inputsDict.keys() or gateInputs[j] in inputs):
-                pass
-            else:
-                pendingLines.append(lines[i])
-                valid = 0
-                break
-        if valid == 1:
-            new.append(lines[i])
-        else:
-            lines.append(pendingLines.pop())
-        leftSide.append(vars[0])
-        print(vars)
-    print(pendingLines)
-    print(new)
-    return inputsDict
+    flag = [0, 0]
+    flag[0] = lines[firstLine:]
+    flag[1] = inputs
+    while(len(flag) != 1):
+        flag = sort(flag[0], flag[1])
+
+    if firstLine == 1:
+        flag[0] = [topInputs] + flag[0]
+    return flag[0]
 
 
 def main():
     # 3.1
-    circuit(1, 2, 3, 4, 5, 6)
+    print(circuit(1, 2, 3, 4, 5, 6))
     testbench()
 
     # 3.2
-    print(triatria())
+    print(triadio())
+
+    # 3.3
+    triatria()
+
 
 if __name__ == "__main__":
     main()
