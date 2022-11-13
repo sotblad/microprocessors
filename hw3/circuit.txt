@@ -1,10 +1,4 @@
-top_inputs a b c d e f
-NOT j f
-NOT g a
-AND h b c
-AND i d e
-AND l i j
-AND k g h
-NOT m k
-AND n m l
-NOT o n
+top_inputs a b c
+AND e a b
+NOT f c
+AND d e f

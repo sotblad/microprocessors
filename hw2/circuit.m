@@ -16,8 +16,10 @@ function s=circuit(a, b, c)
   d = sp2AND(e,f);
   printf("Circuit output: %f\n", d);
   # 2.2
+  switchingActivitye = 2*e*(1-e);
+  switchingActivityf = 2*f*(1-f);
   switchingActivity = 2*d*(1-d);
-  printf("~~~~~~~~~~~~~~~~~\nCircuit Switching Activity: %f\n", switchingActivity);
+  printf("~~~~~~~~~~~~~~~~~\nCircuit Switching Activity: %f %f %f\n", switchingActivitye, switchingActivityf, switchingActivity);
   # 2.3
   values = [10, 100, 4456];
   for i = values

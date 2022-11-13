@@ -16,27 +16,81 @@ def spXOR(input1sp, input2sp):
     return input1sp*input2sp*((1/input1sp) + (1/input2sp) - 2)
 
 
-def testbench():
-    gates = 3
+def switchingActivity(sp):
+    return 2*sp*(1-sp)
 
+
+def testbench(circuitRes):
     tTable = []
-    for x in range(0, 2**gates):
-        tTable.append([x // 4 % 2, x // 2 % 2, x % 2])
+    cnt = 1
+    for x in range(0, 2 ** 3):
+        pinakas = []
+        for i in range(0, 3):
+            pinakas.append(x // cnt % 2)
+            cnt *= 2
+        pinakas = pinakas[::-1]
+        cnt = 1
+        tTable.append(pinakas)
 
     e = [0, 0, 0, 0, 0, 0, 1, 1]
     f = [1, 0, 1, 0, 1, 0, 1, 0]
     d = [0, 0, 0, 0, 0, 0, 1, 0]
 
     counter = 0
-    for i in range(0, 2**gates):
+    for i in range(0, 2**3):
         res = circuit(tTable[i][0], tTable[i][1], tTable[i][2], 0, 0, 0)
         if res[4] == e[i] and res[5] == f[i] and res[3] == d[i]:
             counter += 1
 
     if counter == 8:
         print("✅ Testbench passed")
+        print("Switching activity\n~~~~~~~~~~~~~~~~~~")
+        print("swE =", switchingActivity(circuitRes[4]))
+        print("swF =", switchingActivity(circuitRes[5]))
+        print("swD =", switchingActivity(circuitRes[3]), "\n~~~~~~~~~~~~~~~~~~")
     else:
         print("❌ Testbench failed")
+        return False
+
+    return True
+
+# def testbench2(inputs, lines):
+#     print(inputs)
+#     inputsLen = len(inputs)
+#     tTable = []
+#     cnt = 1
+#     for x in range(0, 2**inputsLen):
+#         pinakas = []
+#         for i in range(0, inputsLen):
+#             pinakas.append(x // cnt % 2)
+#             cnt *= 2
+#         pinakas = pinakas[::-1]
+#         cnt = 1
+#         tTable.append(pinakas)
+#
+#     inpKeys = list(inputs.keys())
+#     print(inpKeys)
+#
+#     for i in range(0, len(lines)):
+#         linesSplit = lines[i].split()
+#         print(linesSplit)
+#         if linesSplit[0] == "NOT":
+#             x = inpKeys.index(linesSplit[2])
+#             print("AAAAAAA", x)
+#             inpKeys.append(linesSplit[1])
+#             arr = []
+#             for j in range(0, 2**inputsLen):
+#                 arr.append(spNOT(tTable[j][x]))
+#             print(arr)
+#         elif linesSplit[0] == "AND":
+#             print("O")
+#     #
+#     #
+#     # e = [0, 0, 0, 0, 0, 0, 1, 1]
+#     # f = [1, 0, 1, 0, 1, 0, 1, 0]
+#     # d = [0, 0, 0, 0, 0, 0, 1, 0]
+#
+#     return True
 
 
 class Entity:
@@ -75,12 +129,7 @@ def circuit(a, b, c, d, e, f):
     return SignalsTable
 
 
-def triadio():
-    ElementTypes = ["AND", "NOT", "XOR"]
-    inputsDict = dict()
-    with open('circuit.txt') as f:
-        lines = [line.rstrip('\n') for line in f]
-
+def findInputs(lines):
     firstLine = 0
     if lines[0][0:10] == "top_inputs":
         firstLine = 1
@@ -91,8 +140,21 @@ def triadio():
         for i in range(firstLine, len(lines)):
             vars = lines[i].split()[1:]
             leftSide.append(vars[0])
-            rightSide = rightSide+vars[1:]
+            rightSide = rightSide + vars[1:]
         inputs = list(set(rightSide) - set(leftSide))
+
+    return [firstLine, inputs]
+
+
+def triadio():
+    ElementTypes = ["AND", "NOT", "XOR"]
+    inputsDict = dict()
+    with open('circuit.txt') as f:
+        lines = [line.rstrip('\n') for line in f]
+
+    findInps = findInputs(lines)
+    firstLine = findInps[0]
+    inputs = findInps[1]
 
     for i in range(firstLine, len(lines)):
         lineParts = lines[i].split()
@@ -109,6 +171,12 @@ def triadio():
             inputsDict[vars[0]] = spNOT(inputsDict[vars[1]])
         else:
             inputsDict[vars[0]] = spXOR(inputsDict[vars[1]], inputsDict[vars[2]])
+
+    # inpsDict = dict()
+    # for i in inputs:
+    #     inpsDict[i] = inputsDict[i]
+    #
+    # testbench2(inpsDict, lines[firstLine:])
 
     return inputsDict
 
@@ -129,7 +197,6 @@ def sort(lines, inputs):
             bad = 1
             badList.append(i)
     if bad == 0:
-        print("\n".join(lines))
         return [lines]
     next = goodList + badList
     nextInps = inputs + inps
@@ -144,42 +211,31 @@ def triatria():
     with open('circuit.txt') as f:
         lines = [line.rstrip('\n') for line in f]
 
-    firstLine = 0
-    topInputs = ""
-    if lines[0][0:10] == "top_inputs":
-        firstLine = 1
-        topInputs = lines[0]
-        inputs = lines[0].split()[1:]
-    else:
-        leftSide = []
-        rightSide = []
-        for i in range(firstLine, len(lines)):
-            vars = lines[i].split()[1:]
-            leftSide.append(vars[0])
-            rightSide = rightSide + vars[1:]
-        inputs = list(set(rightSide) - set(leftSide))
+    findInps = findInputs(lines)
+    firstLine = findInps[0]
+    inputs = findInps[1]
 
-    flag = [0, 0]
-    flag[0] = lines[firstLine:]
-    flag[1] = inputs
+    flag = [lines[firstLine:], inputs]
     while len(flag) != 1:
         flag = sort(flag[0], flag[1])
 
     if firstLine == 1:
-        flag[0] = [topInputs] + flag[0]
+        inputs.insert(0, "top_inputs")
+        flag[0] = [" ".join(inputs)] + flag[0]
     return flag[0]
 
 
 def main():
     # 3.1
-    print(circuit(1, 2, 3, 4, 5, 6))
-    testbench()
+    circuitRes = circuit(0.4456, 0.4456, 0.4456, 0, 0, 0)
+    testbench(circuitRes)
+
 
     # 3.2
     print(triadio())
 
     # 3.3
-    triatria()
+    print(triatria())
 
 
 if __name__ == "__main__":
