@@ -54,44 +54,6 @@ def testbench(circuitRes):
 
     return True
 
-# def testbench2(inputs, lines):
-#     print(inputs)
-#     inputsLen = len(inputs)
-#     tTable = []
-#     cnt = 1
-#     for x in range(0, 2**inputsLen):
-#         pinakas = []
-#         for i in range(0, inputsLen):
-#             pinakas.append(x // cnt % 2)
-#             cnt *= 2
-#         pinakas = pinakas[::-1]
-#         cnt = 1
-#         tTable.append(pinakas)
-#
-#     inpKeys = list(inputs.keys())
-#     print(inpKeys)
-#
-#     for i in range(0, len(lines)):
-#         linesSplit = lines[i].split()
-#         print(linesSplit)
-#         if linesSplit[0] == "NOT":
-#             x = inpKeys.index(linesSplit[2])
-#             print("AAAAAAA", x)
-#             inpKeys.append(linesSplit[1])
-#             arr = []
-#             for j in range(0, 2**inputsLen):
-#                 arr.append(spNOT(tTable[j][x]))
-#             print(arr)
-#         elif linesSplit[0] == "AND":
-#             print("O")
-#     #
-#     #
-#     # e = [0, 0, 0, 0, 0, 0, 1, 1]
-#     # f = [1, 0, 1, 0, 1, 0, 1, 0]
-#     # d = [0, 0, 0, 0, 0, 0, 1, 0]
-#
-#     return True
-
 
 class Entity:
     def __init__(self, type, inputs, output):
@@ -172,12 +134,6 @@ def triadio():
         else:
             inputsDict[vars[0]] = spXOR(inputsDict[vars[1]], inputsDict[vars[2]])
 
-    # inpsDict = dict()
-    # for i in inputs:
-    #     inpsDict[i] = inputsDict[i]
-    #
-    # testbench2(inpsDict, lines[firstLine:])
-
     return inputsDict
 
 
@@ -228,6 +184,7 @@ def triatria():
 def main():
     # 3.1
     circuitRes = circuit(0.4456, 0.4456, 0.4456, 0, 0, 0)
+    print(circuitRes)
     testbench(circuitRes)
 
 
