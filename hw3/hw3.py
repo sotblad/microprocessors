@@ -118,21 +118,25 @@ def triadio():
     firstLine = findInps[0]
     inputs = findInps[1]
 
-    for i in range(firstLine, len(lines)):
-        lineParts = lines[i].split()
-        type = ElementTypes.index(lineParts[0])
-        vars = lineParts[1:]
-        currentInputs = []
-        for j in vars:
-            if j in inputs and j not in inputsDict.keys():
-                inputsDict[j] = float(input(str(j) + " = "))
-                currentInputs.append(inputsDict[j])
-        if type == 0:
-            inputsDict[vars[0]] = spAND(inputsDict[vars[1]], inputsDict[vars[2]])
-        elif type == 1:
-            inputsDict[vars[0]] = spNOT(inputsDict[vars[1]])
-        else:
-            inputsDict[vars[0]] = spXOR(inputsDict[vars[1]], inputsDict[vars[2]])
+    try:
+        for i in range(firstLine, len(lines)):
+            lineParts = lines[i].split()
+            type = ElementTypes.index(lineParts[0])
+            vars = lineParts[1:]
+            currentInputs = []
+            for j in vars:
+                if j in inputs and j not in inputsDict.keys():
+                    inputsDict[j] = float(input(str(j) + " = "))
+                    currentInputs.append(inputsDict[j])
+            if type == 0:
+                inputsDict[vars[0]] = spAND(inputsDict[vars[1]], inputsDict[vars[2]])
+            elif type == 1:
+                inputsDict[vars[0]] = spNOT(inputsDict[vars[1]])
+            else:
+                inputsDict[vars[0]] = spXOR(inputsDict[vars[1]], inputsDict[vars[2]])
+    except:
+        print("This circuit is not sorted!")
+        return
 
     return inputsDict
 
@@ -183,15 +187,19 @@ def triatria():
 
 def main():
     # 3.1
-    circuitRes = circuit(0.4456, 0.4456, 0.4456, 0, 0, 0)
-    print(circuitRes)
-    testbench(circuitRes)
+    # circuitRes = circuit(0.4456, 0.4456, 0.4456, 0, 0, 0)
+    # print(circuitRes)
+    # circuitResAvg = circuit(0.5, 0.5, 0.5, 0, 0, 0)
+    # print(circuitResAvg, "\nAverage Switching Activity: ")
+    # testbench(circuitResAvg)
+    # print("\n~~~~~~~~~~~~~~~~~~~~~\n~~~~~~~~~~~~~~~~~~~~~ ")
+    # testbench(circuitRes)
 
 
     # 3.2
     print(triadio())
-
-    # 3.3
+    # #
+    # # # 3.3
     print(triatria())
 
 
