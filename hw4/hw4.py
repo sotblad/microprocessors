@@ -59,16 +59,32 @@ class Entity:
     def __str__(self):
         return "{type=" + str(self.type) + ", inputs=" + str(self.inputs) + ", output=" + str(self.output) + "}"
 
+
 class Individual:
     def __init__(self, workload):
         self.workload = workload
         self.score = 0
+        self.parent = 0
 
     def setScore(self, score):
         self.score = score
 
+    def setParent(self, isParent):
+        self.parent = isParent
+
     def __str__(self):
         return "{workload=" + str(self.workload) + ", score=" + str(self.score) + "}"
+
+
+class Population:
+    def __init__(self):
+        self.individuals = []
+        self.best = -1
+        self.sbest = -1
+
+    def __str__(self):
+        return "{best=" + str(self.best) + ", sbest=" + str(self.sbest) + "}"
+
 
 def randomWorkload(inputs, L):
     workload = []
@@ -170,20 +186,21 @@ def preprocess(circuit):
 
 
 def setInputs(inputs, inputKeys, signalTable):
+    sTable = copy.deepcopy(signalTable)
     for i in range(0, len(inputKeys)):
-        signalTable[inputKeys[i]] = inputs[i]
-    return signalTable
+        sTable[inputKeys[i]] = inputs[i]
+    return sTable
 
 
-def calculateScores(IndividualsTable, ElementsTable, sortedCircuit, SignalsTable):
+def calculateScores(IndividualsTable, ElementsTable, sortedCircuit, signalsTable):
     for i in range(0, len(IndividualsTable)):
-        SignalsTable1 = setInputs(IndividualsTable[i].workload[0], sortedCircuit[1], SignalsTable)
+        SignalsTable1 = setInputs(IndividualsTable[i].workload[0], sortedCircuit[1], signalsTable)
 
         for j in ElementsTable:
             SignalsTable1 = process(j, SignalsTable1)
         signalsBefore = copy.deepcopy(SignalsTable1)
 
-        SignalsTable2 = setInputs(IndividualsTable[i].workload[1], sortedCircuit[1], SignalsTable)
+        SignalsTable2 = setInputs(IndividualsTable[i].workload[1], sortedCircuit[1], signalsTable)
 
         for j in ElementsTable:
             SignalsTable2 = process(j, SignalsTable2)
@@ -192,12 +209,67 @@ def calculateScores(IndividualsTable, ElementsTable, sortedCircuit, SignalsTable
         switchesCounter = countSwitches(signalsBefore, signalsAfter, sortedCircuit[1])
         IndividualsTable[i].score = switchesCounter
 
+
+def gaSelectParents(IndividualsTable, population, N, L):
+    best = -1 # best
+    sbest = -1 # 2nd best
+    besti = -1 # index of the best
+    sbesti = -1 # index of the 2nd best
+
+    for i in range(0, len(IndividualsTable)):
+        if IndividualsTable[i].score > best:
+            sbest = best
+            best = IndividualsTable[i].score
+            sbesti = besti
+            besti = i
+        else:
+            if IndividualsTable[i].score >= sbest:
+                sbest = IndividualsTable[i].score
+                sbesti = i
+    parent1 = 1#gaGetWorkloadFromPopulation(N, L, population, besti)
+    parent2 = 1# gaGetWorkloadFromPopulation(N, L, population, sbesti)
+    score1 = best
+    score2 = sbest
+    return [parent1, parent2, score1, score2]
+
+
+def seedPopulation(L, N, tlpinputs):
+    population = Population()
+    for i in range(0, N):
+        workload = randomWorkload(tlpinputs, L)
+        individual = Individual(workload)
+        population.individuals.append(individual)
+    return population
+
+
+def measurePopulation(population, signalsTable, tlpinputs, ElementsTable):
+    for individual in population.individuals:
+        switchesCounter = 0
+        for input in individual.workload:
+            sTable = copy.deepcopy(signalsTable)
+            SignalsTable1 = setInputs(input, tlpinputs, sTable)
+
+            for i in ElementsTable:
+                SignalsTable1 = process(i, SignalsTable1)
+            signalsAfter = copy.deepcopy(SignalsTable1)
+
+            switchesCounter += countSwitches(signalsBefore, signalsAfter, tlpinputs)
+            signalsBefore = copy.deepcopy(signalsAfter)
+            print(switchesCounter)
+    #        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+    switches = 0
+      #  calculateScores(IndividualsTable, ElementsTable, sortedCircuit, SignalsTable)
+      # for j in range(0, len(population.individuals[i].workload)):
+
+
+
 def main():
-    Individuals = 2000
+    Individuals = 10000
     sortedCircuit = readCircuit()
     pp = preprocess(sortedCircuit)
     ElementsTable = pp[0]
     SignalsTable = pp[1]
+    cleanSignalsTable = copy.deepcopy(SignalsTable)
    # print(SignalsTable)
 
     IndividualsTable = []
@@ -211,6 +283,14 @@ def main():
     y = [i.score for i in IndividualsTable]
     plt.plot(x, y)
     plt.show()
+
+
+    L = 3
+    N = 4
+   # population = seedPopulation(L, N, sortedCircuit[1])
+   # measurePopulation(population, cleanSignalsTable, sortedCircuit[1], ElementsTable)
+    #print(population.individuals)
+
 
 
 if __name__ == "__main__":
