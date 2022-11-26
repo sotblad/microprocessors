@@ -82,6 +82,10 @@ class Population:
         self.best = -1
         self.sbest = -1
 
+    def setBests(self, bests):
+        self.best = bests[0]
+        self.sbest = bests[1]
+
     def __str__(self):
         return "{best=" + str(self.best) + ", sbest=" + str(self.sbest) + "}"
 
@@ -108,11 +112,11 @@ def process(element, SignalsTable):
     inputs = []
     for i in element.inputs:
         inputs.append(SignalsTable[i])
-    if element.type == 0: # AND
+    if element.type == 0:  # AND
         SignalsTable[element.output] = spAND(inputs)
-    elif element.type == 1: # OR
+    elif element.type == 1:  # OR
         SignalsTable[element.output] = spOR(inputs)
-    elif element.type == 2: # XOR
+    elif element.type == 2:  # XOR
         SignalsTable[element.output] = spXOR(inputs)
     elif element.type == 3:  # XNOR
         SignalsTable[element.output] = spXNOR(inputs)
@@ -210,24 +214,36 @@ def calculateScores(IndividualsTable, ElementsTable, sortedCircuit, signalsTable
         IndividualsTable[i].score = switchesCounter
 
 
-def gaSelectParents(IndividualsTable, population, N, L):
-    best = -1 # best
-    sbest = -1 # 2nd best
-    besti = -1 # index of the best
-    sbesti = -1 # index of the 2nd best
+def gaSelectParents(IndividualsTable):
+    best = -1  # best
+    sbest = -1  # 2nd best
+    besti = -1  # index of the best
+    sbesti = -1  # index of the 2nd best
 
+    tmpW1 = []
+    tmpW2 = []
     for i in range(0, len(IndividualsTable)):
-        if IndividualsTable[i].score > best:
+        if IndividualsTable[i].score > best and IndividualsTable[i].workload != tmpW1:
             sbest = best
             best = IndividualsTable[i].score
+            tmpW1 = IndividualsTable[i].workload
             sbesti = besti
             besti = i
         else:
-            if IndividualsTable[i].score >= sbest:
+            if IndividualsTable[i].score >= sbest and IndividualsTable[i].workload != tmpW2:
+                tmpW2 = IndividualsTable[i].workload
                 sbest = IndividualsTable[i].score
                 sbesti = i
-    parent1 = 1#gaGetWorkloadFromPopulation(N, L, population, besti)
-    parent2 = 1# gaGetWorkloadFromPopulation(N, L, population, sbesti)
+
+    parent1 = -1
+    parent2 = -1
+    for i in range(0, len(IndividualsTable)):
+        if IndividualsTable[i].score == best and parent1 == -1:
+            parent1 = i
+            IndividualsTable[i].setParent(1)
+        if IndividualsTable[i].score == sbest and parent2 == -1:
+            parent2 = i
+            IndividualsTable[i].setParent(1)
     score1 = best
     score2 = sbest
     return [parent1, parent2, score1, score2]
@@ -244,34 +260,73 @@ def seedPopulation(L, N, tlpinputs):
 
 def measurePopulation(population, signalsTable, tlpinputs, ElementsTable):
     for individual in population.individuals:
-        switchesCounter = 0
+        switches = 0
+        signalsBefore = copy.deepcopy(signalsTable)
+
         for input in individual.workload:
-            sTable = copy.deepcopy(signalsTable)
-            SignalsTable1 = setInputs(input, tlpinputs, sTable)
+            SignalsTable1 = setInputs(input, tlpinputs, signalsBefore)
 
             for i in ElementsTable:
                 SignalsTable1 = process(i, SignalsTable1)
             signalsAfter = copy.deepcopy(SignalsTable1)
 
-            switchesCounter += countSwitches(signalsBefore, signalsAfter, tlpinputs)
+            switches += countSwitches(signalsBefore, signalsAfter, tlpinputs)
             signalsBefore = copy.deepcopy(signalsAfter)
-            print(switchesCounter)
-    #        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-    switches = 0
-      #  calculateScores(IndividualsTable, ElementsTable, sortedCircuit, SignalsTable)
-      # for j in range(0, len(population.individuals[i].workload)):
+        individual.score = switches
+    res = gaSelectParents(population.individuals)
+    population.setBests(res)
 
+
+def crossover(population, L, N):
+    newPopulation = Population()
+    for i in population.individuals:
+        if i.parent == 1:
+            newPopulation.individuals.append(i)
+    C = [0, 1]
+    for i in range(N-2):
+        R = random.randint(1, L)
+        random.shuffle(C)
+        workload = newPopulation.individuals[C[0]].workload[0:R]
+        if R < L:
+            workload += newPopulation.individuals[C[1]].workload[R:]
+        newIndividual = Individual(workload)
+        newPopulation.individuals.append(newIndividual)
+
+    return newPopulation
+
+
+def mutate(population, m):
+    mutatedPopulation = Population()
+    for i in range(0, 2):
+        mutatedPopulation.individuals.append(population.individuals[i])
+
+    for i in range(2, len(population.individuals)):
+        workload = []
+        for j in population.individuals[i].workload:
+            row = []
+            for k in j:
+                if random.randint(0, 100) <= m*100:
+                    if k == 0:
+                        row.append(1)
+                    else:
+                        row.append(0)
+                else:
+                    row.append(k)
+            workload.append(row)
+        mutatedPopulation.individuals.append(Individual(workload))
+    return mutatedPopulation
 
 
 def main():
-    Individuals = 10000
+    Individuals = 2000
     sortedCircuit = readCircuit()
     pp = preprocess(sortedCircuit)
     ElementsTable = pp[0]
     SignalsTable = pp[1]
     cleanSignalsTable = copy.deepcopy(SignalsTable)
-   # print(SignalsTable)
+    # print(SignalsTable)
 
+    # 4.1
     IndividualsTable = []
     for i in range(0, Individuals):
         randWorkload = randomWorkload(sortedCircuit[1], 2)
@@ -284,13 +339,21 @@ def main():
     plt.plot(x, y)
     plt.show()
 
-
     L = 3
     N = 4
-   # population = seedPopulation(L, N, sortedCircuit[1])
-   # measurePopulation(population, cleanSignalsTable, sortedCircuit[1], ElementsTable)
-    #print(population.individuals)
+    m = 0.01
+    generationsNumber = 100
+    generations = []
+    population = seedPopulation(L, N, sortedCircuit[1])
+    for i in range(generationsNumber):
+        measurePopulation(population, cleanSignalsTable, sortedCircuit[1], ElementsTable)
+        generations.append(population)
+        population = crossover(population, L, N)
+        population = mutate(population, m)
 
+    for i in generations:
+        print(i)
+        print(i.individuals[i.best].score, i.individuals[i.sbest].score)
 
 
 if __name__ == "__main__":
