@@ -81,13 +81,17 @@ class Population:
         self.individuals = []
         self.best = -1
         self.sbest = -1
+        self.score = 0
 
     def setBests(self, bests):
         self.best = bests[0]
         self.sbest = bests[1]
 
+    def setScore(self, score):
+        self.score = score
+
     def __str__(self):
-        return "{best=" + str(self.best) + ", sbest=" + str(self.sbest) + "}"
+        return "{scoreG= " + str(self.score) + ", best=" + str(self.best) + ", sbest=" + str(self.sbest) + "}"
 
 
 def randomWorkload(inputs, L):
@@ -317,6 +321,15 @@ def mutate(population, m):
     return mutatedPopulation
 
 
+def populationScore(population):
+    score = population.individuals[0].score
+    for individual in population.individuals:
+        if score < individual.score:
+            score = individual.score
+
+    return score
+
+
 def main():
     Individuals = 2000
     sortedCircuit = readCircuit()
@@ -339,21 +352,60 @@ def main():
     plt.plot(x, y)
     plt.show()
 
-    L = 3
-    N = 4
-    m = 0.01
+    L = 2
+    N = 30
+    m = 0.05
     generationsNumber = 100
     generations = []
     population = seedPopulation(L, N, sortedCircuit[1])
+    scoresG = []
     for i in range(generationsNumber):
         measurePopulation(population, cleanSignalsTable, sortedCircuit[1], ElementsTable)
+        score = populationScore(population)
+        population.setScore(score)
+        scoresG.append(score)
         generations.append(population)
         population = crossover(population, L, N)
         population = mutate(population, m)
 
-    for i in generations:
-        print(i)
-        print(i.individuals[i.best].score, i.individuals[i.sbest].score)
+    generations2 = []
+    population2 = seedPopulation(L, N, sortedCircuit[1])
+    scoresG2 = []
+    for i in range(generationsNumber):
+        measurePopulation(population2, cleanSignalsTable, sortedCircuit[1], ElementsTable)
+        score = populationScore(population2)
+        population2.setScore(score)
+        scoresG2.append(score)
+        generations2.append(population2)
+        population2 = crossover(population2, L, N)
+        population2 = mutate(population2, m)
+
+    generations3 = []
+    population3 = seedPopulation(L, N, sortedCircuit[1])
+    scoresG3 = []
+    for i in range(generationsNumber):
+        measurePopulation(population3, cleanSignalsTable, sortedCircuit[1], ElementsTable)
+        score = populationScore(population3)
+        population3.setScore(score)
+        scoresG3.append(score)
+        generations3.append(population3)
+        population3 = crossover(population3, L, N)
+        population3 = mutate(population3, m)
+
+    # for i in generations:
+    #     print(i)
+    #     print(i.individuals[i.best].score, i.individuals[i.sbest].score)
+
+    x = list(range(generationsNumber))
+    plt.plot(x, scoresG, label="line 1")
+    plt.plot(x, scoresG2, label="line 2")
+    plt.plot(x, scoresG3, label="line 2")
+    plt.show()
+
+    with open('res.txt', 'w') as f:
+        for i in range(len(scoresG)):
+            f.write(str(i) + " " + str(scoresG[i]) + "\n")
+        f.close()
 
 
 if __name__ == "__main__":
